@@ -36,9 +36,12 @@ func TestDiffDataset(t *testing.T) {
 		{"testdata/exampleData_orig.json", "testdata/exampleData_orig.json", "", ""},
 		{"testdata/exampleData_orig.json", "testdata/exampleData_newData.json", "Data Changed.", ""},
 		{"testdata/exampleData_orig.json", "testdata/exampleData_newStructure.json", "Structure Changed.", ""},
+		{"testdata/exampleData_oldChecksum.json", "testdata/exampleData_newChecksum.json", "Structure Changed.", ""},
 		{"testdata/exampleData_orig.json", "testdata/exampleData_newDataAndStructure.json", "Structure Changed.", ""},
 		{"testdata/exampleData_orig.json", "testdata/exampleData_blankStructure.json", "", "error: structure path cannot be empty string"},
 		{"testdata/exampleData_orig.json", "testdata/exampleData_blankData.json", "", "error: data path cannot be empty string"},
+		{"testdata/exampleData_orig_with_meta.json", "testdata/exampleData_newTitle.json", "Title Changed.", ""},
+		{"testdata/exampleData_orig_with_meta.json", "testdata/exampleData_newDescription.json", "Description Changed.", ""},
 	}
 	// load files and execute tests
 	for i, c := range cases {
