@@ -22,6 +22,10 @@ func (diffList DiffList) String() string {
 	return ""
 }
 
+func (diffList DiffList) List() []Diff {
+	return diffList.diffs
+}
+
 func diffStructure(a, b *dataset.Dataset) (*DiffList, error) {
 	diffList := &DiffList{}
 	diffDescription := Diff("")
