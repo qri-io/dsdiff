@@ -22,6 +22,11 @@ func (diffList DiffList) String() string {
 	return ""
 }
 
+// List returns full list of diffs
+func (diffList DiffList) List() []Diff {
+	return diffList.diffs
+}
+
 func diffStructure(a, b *dataset.Dataset) (*DiffList, error) {
 	diffList := &DiffList{}
 	diffDescription := Diff("")
@@ -39,6 +44,41 @@ func diffStructure(a, b *dataset.Dataset) (*DiffList, error) {
 		} else {
 			return nil, fmt.Errorf("error: structure path cannot be empty string")
 		}
+	}
+	return diffList, nil
+}
+
+func diffTransform(a, b *dataset.Dataset) (*DiffList, error) {
+	diffList := &DiffList{}
+	diffDescription := Diff("")
+	if a.Transform != nil && b.Transform != nil {
+		if len(a.Transform.Path().String()) > 1 && len(b.Transform.Path().String()) > 1 {
+			if a.Transform.Path() != b.Transform.Path() {
+				diffDescription = Diff("Transform Changed.")
+				diffList.diffs = append(diffList.diffs, diffDescription)
+			}
+		}
+		// else {
+		// 	...
+		// }
+	}
+
+	return diffList, nil
+}
+
+func diffVisConfig(a, b *dataset.Dataset) (*DiffList, error) {
+	diffList := &DiffList{}
+	diffDescription := Diff("")
+	if a.VisConfig != nil && b.VisConfig != nil {
+		if len(a.VisConfig.Path().String()) > 1 && len(b.VisConfig.Path().String()) > 1 {
+			if a.VisConfig.Path() != b.VisConfig.Path() {
+				diffDescription = Diff("VisConfig Changed.")
+				diffList.diffs = append(diffList.diffs, diffDescription)
+			}
+		}
+		// else {
+		// ...
+		// }x
 	}
 	return diffList, nil
 }
@@ -115,6 +155,22 @@ func DiffDatasets(a, b *dataset.Dataset) (*DiffList, error) {
 	}
 	if len(metaDiffList.diffs) > 0 {
 		diffList.diffs = append(diffList.diffs, metaDiffList.diffs...)
+	}
+	// Compare Transform
+	transformDiffList, err := diffTransform(a, b)
+	if err != nil {
+		return nil, err
+	}
+	if len(transformDiffList.diffs) > 0 {
+		diffList.diffs = append(diffList.diffs, transformDiffList.diffs...)
+	}
+	// Compare VisConfig
+	visConfigDiffList, err := diffVisConfig(a, b)
+	if err != nil {
+		return nil, err
+	}
+	if len(visConfigDiffList.diffs) > 0 {
+		diffList.diffs = append(diffList.diffs, visConfigDiffList.diffs...)
 	}
 	return diffList, nil
 }
