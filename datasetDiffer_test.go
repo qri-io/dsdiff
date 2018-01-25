@@ -33,15 +33,18 @@ func TestDiffDataset(t *testing.T) {
 		expected string
 		err      string
 	}{
-		{"testdata/exampleData_orig.json", "testdata/exampleData_orig.json", "", ""},
-		{"testdata/exampleData_orig.json", "testdata/exampleData_newData.json", "Data Changed.", ""},
-		{"testdata/exampleData_orig.json", "testdata/exampleData_newStructure.json", "Structure Changed.", ""},
-		{"testdata/exampleData_oldChecksum.json", "testdata/exampleData_newChecksum.json", "Structure Changed.", ""},
-		{"testdata/exampleData_orig.json", "testdata/exampleData_newDataAndStructure.json", "Structure Changed.", ""},
-		{"testdata/exampleData_orig.json", "testdata/exampleData_blankStructure.json", "", "error: structure path cannot be empty string"},
-		{"testdata/exampleData_orig.json", "testdata/exampleData_blankData.json", "", "error: data path cannot be empty string"},
-		{"testdata/exampleData_orig_with_meta.json", "testdata/exampleData_newTitle.json", "Title Changed.", ""},
-		{"testdata/exampleData_orig_with_meta.json", "testdata/exampleData_newDescription.json", "Description Changed.", ""},
+		{"testdata/orig.json", "testdata/orig.json", "", ""},
+		{"testdata/orig.json", "testdata/newData.json", "Data Changed.", ""},
+		{"testdata/orig.json", "testdata/newStructure.json", "Structure Changed.", ""},
+		{"testdata/oldChecksum.json", "testdata/newChecksum.json", "Structure Changed.", ""},
+		{"testdata/orig.json", "testdata/newDataAndStructure.json", "Structure Changed.", ""},
+		{"testdata/orig.json", "testdata/blankStructure.json", "", "error: structure path cannot be empty string"},
+		{"testdata/orig.json", "testdata/blankData.json", "", "error: data path cannot be empty string"},
+		{"testdata/orig_with_meta.json", "testdata/newTitle.json", "Title Changed.", ""},
+		{"testdata/orig_with_meta.json", "testdata/newDescription.json", "Description Changed.", ""},
+		//TODO: test transform cahnge (need path)
+		{"testdata/exampleD"}
+		//TODO: test visconfig change (need path)
 	}
 	// load files and execute tests
 	for i, c := range cases {

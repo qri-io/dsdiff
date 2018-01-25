@@ -43,6 +43,35 @@ func diffStructure(a, b *dataset.Dataset) (*DiffList, error) {
 	return diffList, nil
 }
 
+func diffTransform(a, b *dataset.Dataset) (*DiffList, error) {
+	diffList := &DiffList{}
+	diffDescription := Diff("")
+	if len(a.Transform.Path().String()) > 1 && len(b.Transform.Path().String()) > 1 {
+		if a.Transform.Path() != b.Transform.Path() {
+			diffDescription = Diff("Transform Changed.")
+			diffList.diffs = append(diffList.diffs, diffDescription)
+		}
+	}
+	// else {
+	// 	...
+	// }
+	return diffList, nil
+}
+
+func diffVisConfig(a, b *dataset.Dataset) (*DiffList, error) {
+	diffList := &DiffList{}
+	diffDescription := Diff("")
+	if len(a.VisConfig.Path().String()) > 1 && len(b.VisConfig.Path().String()) > 1 {
+		if a.VisConfig.Path() != b.VisConfig.Path() {
+			diffDescription = Diff("VisConfig Changed.")
+			diffList.diffs = append*(diffList.diffs, diffDescription)
+		}
+	} 
+	// else {
+	// ...
+	// }
+	return diffList, nil
+}
 //TODO: make work
 func diffData(a, b *dataset.Dataset) (*DiffList, error) {
 	temporarilyBlindToData := true // <-- REMOVE this
@@ -115,6 +144,22 @@ func DiffDatasets(a, b *dataset.Dataset) (*DiffList, error) {
 	}
 	if len(metaDiffList.diffs) > 0 {
 		diffList.diffs = append(diffList.diffs, metaDiffList.diffs...)
+	}
+	// Compare Transform
+	transformDiffList, err := diffTransform(a, b)
+	if err != nil {
+		return nil, err
+	}
+	if len(transformDiffList.diffs) > 0 {
+		diffList.diffs = append(diffList.diffs, transformDiffList.diffs...)
+	}
+	// Compare VisConfig
+	visConfigDiffList, err := diffVisConfig(a, b)
+	if err != nil {
+		return nil, err
+	}
+	if len(visConfigDiffList.diffs) > 0 {
+		diffList.diffs = append(diffList.diffs, visConfigDiffList.diffs...)
 	}
 	return diffList, nil
 }
