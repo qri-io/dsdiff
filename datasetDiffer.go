@@ -46,32 +46,38 @@ func diffStructure(a, b *dataset.Dataset) (*DiffList, error) {
 func diffTransform(a, b *dataset.Dataset) (*DiffList, error) {
 	diffList := &DiffList{}
 	diffDescription := Diff("")
-	if len(a.Transform.Path().String()) > 1 && len(b.Transform.Path().String()) > 1 {
-		if a.Transform.Path() != b.Transform.Path() {
-			diffDescription = Diff("Transform Changed.")
-			diffList.diffs = append(diffList.diffs, diffDescription)
+	if a.Transform != nil && b.Transform != nil {
+		if len(a.Transform.Path().String()) > 1 && len(b.Transform.Path().String()) > 1 {
+			if a.Transform.Path() != b.Transform.Path() {
+				diffDescription = Diff("Transform Changed.")
+				diffList.diffs = append(diffList.diffs, diffDescription)
+			}
 		}
+		// else {
+		// 	...
+		// }
 	}
-	// else {
-	// 	...
-	// }
+
 	return diffList, nil
 }
 
 func diffVisConfig(a, b *dataset.Dataset) (*DiffList, error) {
 	diffList := &DiffList{}
 	diffDescription := Diff("")
-	if len(a.VisConfig.Path().String()) > 1 && len(b.VisConfig.Path().String()) > 1 {
-		if a.VisConfig.Path() != b.VisConfig.Path() {
-			diffDescription = Diff("VisConfig Changed.")
-			diffList.diffs = append*(diffList.diffs, diffDescription)
+	if a.VisConfig != nil && b.VisConfig != nil {
+		if len(a.VisConfig.Path().String()) > 1 && len(b.VisConfig.Path().String()) > 1 {
+			if a.VisConfig.Path() != b.VisConfig.Path() {
+				diffDescription = Diff("VisConfig Changed.")
+				diffList.diffs = append(diffList.diffs, diffDescription)
+			}
 		}
-	} 
-	// else {
-	// ...
-	// }
+		// else {
+		// ...
+		// }x
+	}
 	return diffList, nil
 }
+
 //TODO: make work
 func diffData(a, b *dataset.Dataset) (*DiffList, error) {
 	temporarilyBlindToData := true // <-- REMOVE this
