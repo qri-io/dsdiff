@@ -22,6 +22,7 @@ func (diffList DiffList) String() string {
 	return ""
 }
 
+// List returns full list of diffs
 func (diffList DiffList) List() []Diff {
 	return diffList.diffs
 }
