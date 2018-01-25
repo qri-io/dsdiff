@@ -1,0 +1,12 @@
+{
+  "kind": "qri:ds:0",
+  "DataPath": "abc",
+  "path": "123",
+  "structure": "abc",
+  "meta": {
+  	"title": "abc",
+  	"description": "I am a dataset"
+  }, 
+  "visConfig": "hash1",
+  "transform": "hash2"
+}

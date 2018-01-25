@@ -42,9 +42,10 @@ func TestDiffDataset(t *testing.T) {
 		{"testdata/orig.json", "testdata/blankData.json", "", "error: data path cannot be empty string"},
 		{"testdata/orig_with_meta.json", "testdata/newTitle.json", "Title Changed.", ""},
 		{"testdata/orig_with_meta.json", "testdata/newDescription.json", "Description Changed.", ""},
-		//TODO: test transform cahnge (need path)
-		{"testdata/exampleD"}
+		//TODO: test transform change (need path)
+		// {"orig_with_vis_config_and_transform.json", "orig_with_vis_config_and_transform.json", "Transform Changed.", ""}
 		//TODO: test visconfig change (need path)
+		// {"orig_with_vis_config_and_transform.json", "orig_with_vis_config_and_transform.json", "VisConfig Changed.", ""}
 	}
 	// load files and execute tests
 	for i, c := range cases {
