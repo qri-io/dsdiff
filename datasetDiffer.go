@@ -27,7 +27,8 @@ func (diffList DiffList) List() []Diff {
 	return diffList.diffs
 }
 
-func diffStructure(a, b *dataset.Dataset) (*DiffList, error) {
+//DiffStructure diffs the dataset.Structure of two datasets
+func DiffStructure(a, b *dataset.Dataset) (*DiffList, error) {
 	diffList := &DiffList{}
 	diffDescription := Diff("")
 	if len(a.Structure.Path().String()) > 1 && len(b.Structure.Path().String()) > 1 {
@@ -48,7 +49,8 @@ func diffStructure(a, b *dataset.Dataset) (*DiffList, error) {
 	return diffList, nil
 }
 
-func diffTransform(a, b *dataset.Dataset) (*DiffList, error) {
+//DiffTransform diffs the dataset.Transform of two datasets
+func DiffTransform(a, b *dataset.Dataset) (*DiffList, error) {
 	diffList := &DiffList{}
 	diffDescription := Diff("")
 	if a.Transform != nil && b.Transform != nil {
@@ -66,7 +68,8 @@ func diffTransform(a, b *dataset.Dataset) (*DiffList, error) {
 	return diffList, nil
 }
 
-func diffVisConfig(a, b *dataset.Dataset) (*DiffList, error) {
+// DiffVisConfig diffs the dataset.VisConfig of two datasets
+func DiffVisConfig(a, b *dataset.Dataset) (*DiffList, error) {
 	diffList := &DiffList{}
 	diffDescription := Diff("")
 	if a.VisConfig != nil && b.VisConfig != nil {
@@ -83,8 +86,8 @@ func diffVisConfig(a, b *dataset.Dataset) (*DiffList, error) {
 	return diffList, nil
 }
 
-//TODO: make work
-func diffData(a, b *dataset.Dataset) (*DiffList, error) {
+// DiffData diffs the dataset.Data of two datasets
+func DiffData(a, b *dataset.Dataset) (*DiffList, error) {
 	temporarilyBlindToData := true // <-- REMOVE this
 	diffList := &DiffList{}
 	diffDescription := Diff("")
@@ -101,7 +104,8 @@ func diffData(a, b *dataset.Dataset) (*DiffList, error) {
 	return diffList, nil
 }
 
-func diffMeta(a, b *dataset.Dataset) (*DiffList, error) {
+// DiffMeta diffs the dataset.Meta of two datasets
+func DiffMeta(a, b *dataset.Dataset) (*DiffList, error) {
 	diffList := &DiffList{}
 	diffDescription := Diff("")
 	if a.Meta != nil && b.Meta != nil {
@@ -133,7 +137,7 @@ func diffMeta(a, b *dataset.Dataset) (*DiffList, error) {
 func DiffDatasets(a, b *dataset.Dataset) (*DiffList, error) {
 	diffList := &DiffList{}
 	// Compare Structure
-	structureDiffList, err := diffStructure(a, b)
+	structureDiffList, err := DiffStructure(a, b)
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +145,7 @@ func DiffDatasets(a, b *dataset.Dataset) (*DiffList, error) {
 		diffList.diffs = append(diffList.diffs, structureDiffList.diffs...)
 	}
 	// Compare Data
-	dataDiffList, err := diffData(a, b)
+	dataDiffList, err := DiffData(a, b)
 	if err != nil {
 		return nil, err
 	}
@@ -149,7 +153,7 @@ func DiffDatasets(a, b *dataset.Dataset) (*DiffList, error) {
 		diffList.diffs = append(diffList.diffs, dataDiffList.diffs...)
 	}
 	// Compare Metadata
-	metaDiffList, err := diffMeta(a, b)
+	metaDiffList, err := DiffMeta(a, b)
 	if err != nil {
 		return nil, err
 	}
@@ -157,7 +161,7 @@ func DiffDatasets(a, b *dataset.Dataset) (*DiffList, error) {
 		diffList.diffs = append(diffList.diffs, metaDiffList.diffs...)
 	}
 	// Compare Transform
-	transformDiffList, err := diffTransform(a, b)
+	transformDiffList, err := DiffTransform(a, b)
 	if err != nil {
 		return nil, err
 	}
@@ -165,7 +169,7 @@ func DiffDatasets(a, b *dataset.Dataset) (*DiffList, error) {
 		diffList.diffs = append(diffList.diffs, transformDiffList.diffs...)
 	}
 	// Compare VisConfig
-	visConfigDiffList, err := diffVisConfig(a, b)
+	visConfigDiffList, err := DiffVisConfig(a, b)
 	if err != nil {
 		return nil, err
 	}
