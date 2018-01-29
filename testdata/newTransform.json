@@ -15,7 +15,7 @@
       "syntax": "python",
       "data": "abc",
       "config": {
-        "option": "value"
+        "new_option": "new_value"
       }
     },
     "Commit": {

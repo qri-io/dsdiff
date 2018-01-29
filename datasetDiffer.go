@@ -1,176 +1,229 @@
 package datasetDiffer
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/qri-io/dataset"
+	diff "github.com/yudai/gojsondiff"
 )
 
-// Diff contains a string description of a diff
-type Diff string
-
-// DiffList contains a slice of diffs in order of descending scope
-type DiffList struct {
-	diffs []Diff
+// DiffStructure diffs the structure of two datasets
+func DiffStructure(a, b *dataset.Structure) (diff.Diff, error) {
+	var emptyDiff diff.Diff
+	differ := diff.New()
+	if len(a.Path().String()) > 1 && len(b.Path().String()) > 1 {
+		if a.Path() == b.Path() {
+			return emptyDiff, nil
+		}
+	}
+	if len(a.Checksum) > 1 && len(b.Checksum) > 1 {
+		if a.Checksum == b.Checksum {
+			return emptyDiff, nil
+		}
+	}
+	// If we couldn't determine that there were no changes  using the
+	// path or checksum...
+	aBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling structure a: %s", err.Error())
+	}
+	bBytes, err := json.Marshal(b)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling structure b: %s", err.Error())
+	}
+	d, err := differ.Compare(aBytes, bBytes)
+	if err != nil {
+		return nil, fmt.Errorf("error comparing structure: %s", err.Error())
+	}
+	return d, nil
 }
 
-// String returns the first (largest scope) change as a string
-func (diffList DiffList) String() string {
-	if len(diffList.diffs) > 0 {
-		return string(diffList.diffs[0])
+// DiffData diffs the data of two datasets
+func DiffData(a, b *dataset.Dataset) (diff.Diff, error) {
+	var emptyDiff diff.Diff
+	// differ := diff.New()
+	if len(a.DataPath) > 1 && len(b.DataPath) > 1 {
+		if a.DataPath == b.DataPath {
+			return emptyDiff, nil
+		}
+	}
+	// TODO: dereference DataPath and pass to jsondiffer
+	return emptyDiff, nil
+}
+
+// DiffTransform diffs the transform struct of two datasets
+func DiffTransform(a, b *dataset.Transform) (diff.Diff, error) {
+	var emptyDiff diff.Diff
+	differ := diff.New()
+	if len(a.Path().String()) > 1 && len(b.Path().String()) > 1 {
+		if a.Path() == b.Path() {
+			return emptyDiff, nil
+		}
+	}
+	aBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling transform a: %s", err.Error())
+	}
+	bBytes, err := json.Marshal(b)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling transform b: %s", err.Error())
+	}
+	d, err := differ.Compare(aBytes, bBytes)
+	if err != nil {
+		return nil, fmt.Errorf("error comparing transforms: %s", err.Error())
+	}
+	return d, nil
+}
+
+// DiffMeta diffs the metadata of two datasets
+func DiffMeta(a, b *dataset.Meta) (diff.Diff, error) {
+	var emptyDiff diff.Diff
+	differ := diff.New()
+	if len(a.Path().String()) > 1 && len(b.Path().String()) > 1 {
+		if a.Path() == b.Path() {
+			return emptyDiff, nil
+		}
+	}
+	aBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling meta a: %s", err.Error())
+	}
+	bBytes, err := json.Marshal(b)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling meta b: %s", err.Error())
+	}
+	d, err := differ.Compare(aBytes, bBytes)
+	if err != nil {
+		return nil, fmt.Errorf("error comparing Meta: %s", err.Error())
+	}
+	return d, nil
+}
+
+// DiffVisConfig diffs the dataset.VisConfig structs of two datasets
+func DiffVisConfig(a, b *dataset.VisConfig) (diff.Diff, error) {
+	var emptyDiff diff.Diff
+	differ := diff.New()
+	if len(a.Path().String()) > 1 && len(b.Path().String()) > 1 {
+		if a.Path() == b.Path() {
+			return emptyDiff, nil
+		}
+	}
+	aBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling visConfig a: %s", err.Error())
+	}
+	bBytes, err := json.Marshal(b)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling visConfig b: %s", err.Error())
+	}
+	d, err := differ.Compare(aBytes, bBytes)
+	if err != nil {
+		return nil, fmt.Errorf("error comparing VisConfigs: %s", err.Error())
+	}
+	return d, nil
+}
+
+// DiffDatasets returns a map of diffs of the components of a dataset
+func DiffDatasets(a, b *dataset.Dataset) (map[string]diff.Diff, error) {
+	result := map[string]diff.Diff{}
+	//diff structure
+	if a.Structure != nil && b.Structure != nil {
+		structureDiffs, err := DiffStructure(a.Structure, b.Structure)
+		if err != nil {
+			return nil, err
+		}
+		result["structure"] = structureDiffs
+	}
+	// diff data
+	dataDiffs, err := DiffData(a, b)
+	if err != nil {
+		return nil, err
+	}
+	result["data"] = dataDiffs
+	// diff transform
+	if a.Transform != nil && b.Transform != nil {
+		transformDiffs, err := DiffTransform(a.Transform, b.Transform)
+		if err != nil {
+			return nil, err
+		}
+		result["transform"] = transformDiffs
+	}
+	// diff meta
+	if a.Meta != nil && b.Meta != nil {
+		metaDiffs, err := DiffMeta(a.Meta, b.Meta)
+		if err != nil {
+			return nil, err
+		}
+		result["meta"] = metaDiffs
+	}
+	// diff visConfig
+	if a.VisConfig != nil && b.VisConfig != nil {
+		visConfigDiffs, err := DiffVisConfig(a.VisConfig, b.VisConfig)
+		if err != nil {
+			return nil, err
+		}
+		result["visConfig"] = visConfigDiffs
+	}
+	return result, nil
+}
+
+// DiffJSON diffs two json files independent of any Dataset structures
+func DiffJSON(a, b []byte) (diff.Diff, error) {
+	differ := diff.New()
+	d, err := differ.Compare(a, b)
+	if err != nil {
+		return nil, fmt.Errorf("error comparing json: %s", err.Error())
+	}
+	return d, nil
+}
+
+// MapDiffsToString generates a string description from a map of diffs
+// Currently the String generated reflects the first/highest priority
+// change made.  The priority of changes currently are
+//   1. dataset.Structure
+//   2. dataset.{Data} // TODO: use dereferenced data
+//   3. dataset.Transform
+//   4. dataset.Meta
+//   5. Dataset.VisConfig
+func MapDiffsToString(m map[string]diff.Diff) string {
+	if m["structure"] != nil {
+		structureDiffs := m["structure"]
+		deltas := structureDiffs.Deltas()
+		if len(deltas) > 0 {
+			// for i, d := range deltas {
+			// 	fmt.Printf("%d. %s: (%T)\n", i+1, d)
+			// }
+			return fmt.Sprintf("Structure Changed. (%d changes)", len(deltas))
+		}
+	}
+	if m["data"] != nil {
+		dataDiffs := m["data"]
+		deltas := dataDiffs.Deltas()
+		if len(deltas) > 0 {
+			return fmt.Sprintf("Data Changed. (%d changes)", len(deltas))
+		}
+	}
+	if m["transform"] != nil {
+		transformDiffs := m["transform"]
+		deltas := transformDiffs.Deltas()
+		if len(deltas) > 0 {
+			return fmt.Sprintf("Transform Changed. (%d changes)", len(deltas))
+		}
+	}
+	if m["meta"] != nil {
+		metaDiffs := m["meta"]
+		deltas := metaDiffs.Deltas()
+		if len(deltas) > 0 {
+			return fmt.Sprintf("Metadata Changed. (%d changes)", len(deltas))
+		}
+	}
+	if m["visConfig"] != nil {
+		visConfigDiffs := m["visConfig"]
+		deltas := visConfigDiffs.Deltas()
+		if len(deltas) > 0 {
+			return fmt.Sprintf("VisConfig Changed. (%d changes)", len(deltas))
+		}
 	}
 	return ""
-}
-
-// List returns full list of diffs
-func (diffList DiffList) List() []Diff {
-	return diffList.diffs
-}
-
-func diffStructure(a, b *dataset.Dataset) (*DiffList, error) {
-	diffList := &DiffList{}
-	diffDescription := Diff("")
-	if len(a.Structure.Path().String()) > 1 && len(b.Structure.Path().String()) > 1 {
-		if a.Structure.Path() != b.Structure.Path() {
-			diffDescription = Diff("Structure Changed.")
-			diffList.diffs = append(diffList.diffs, diffDescription)
-		}
-	} else {
-		if len(a.Structure.Checksum) > 1 && len(b.Structure.Checksum) > 1 {
-			if a.Structure.Checksum != b.Structure.Checksum {
-				diffDescription = Diff("Structure Changed.")
-				diffList.diffs = append(diffList.diffs, diffDescription)
-			}
-		} else {
-			return nil, fmt.Errorf("error: structure path cannot be empty string")
-		}
-	}
-	return diffList, nil
-}
-
-func diffTransform(a, b *dataset.Dataset) (*DiffList, error) {
-	diffList := &DiffList{}
-	diffDescription := Diff("")
-	if a.Transform != nil && b.Transform != nil {
-		if len(a.Transform.Path().String()) > 1 && len(b.Transform.Path().String()) > 1 {
-			if a.Transform.Path() != b.Transform.Path() {
-				diffDescription = Diff("Transform Changed.")
-				diffList.diffs = append(diffList.diffs, diffDescription)
-			}
-		}
-		// else {
-		// 	...
-		// }
-	}
-
-	return diffList, nil
-}
-
-func diffVisConfig(a, b *dataset.Dataset) (*DiffList, error) {
-	diffList := &DiffList{}
-	diffDescription := Diff("")
-	if a.VisConfig != nil && b.VisConfig != nil {
-		if len(a.VisConfig.Path().String()) > 1 && len(b.VisConfig.Path().String()) > 1 {
-			if a.VisConfig.Path() != b.VisConfig.Path() {
-				diffDescription = Diff("VisConfig Changed.")
-				diffList.diffs = append(diffList.diffs, diffDescription)
-			}
-		}
-		// else {
-		// ...
-		// }x
-	}
-	return diffList, nil
-}
-
-//TODO: make work
-func diffData(a, b *dataset.Dataset) (*DiffList, error) {
-	temporarilyBlindToData := true // <-- REMOVE this
-	diffList := &DiffList{}
-	diffDescription := Diff("")
-	if len(a.DataPath) > 1 && len(b.DataPath) > 1 {
-		if a.DataPath != b.DataPath {
-			diffDescription = Diff("Data Changed.")
-			diffList.diffs = append(diffList.diffs, diffDescription)
-		}
-	} else {
-		if !temporarilyBlindToData {
-			return nil, fmt.Errorf("error: data path cannot be empty string")
-		}
-	}
-	return diffList, nil
-}
-
-func diffMeta(a, b *dataset.Dataset) (*DiffList, error) {
-	diffList := &DiffList{}
-	diffDescription := Diff("")
-	if a.Meta != nil && b.Meta != nil {
-		if len(a.Meta.Path().String()) > 1 && len(b.Meta.Path().String()) > 1 {
-			if a.Meta.Path() != b.Meta.Path() {
-				diffDescription = Diff("Metadata Changed.")
-				diffList.diffs = append(diffList.diffs, diffDescription)
-			}
-		} else {
-			if a.Meta.Title != b.Meta.Title && a.Meta.Title != "" {
-				diffDescription = Diff("Title Changed.")
-				diffList.diffs = append(diffList.diffs, diffDescription)
-			}
-			if a.Meta.Description != b.Meta.Description && a.Meta.Description != "" {
-				diffDescription = Diff("Description Changed.")
-				diffList.diffs = append(diffList.diffs, diffDescription)
-			}
-		}
-	}
-	return diffList, nil
-}
-
-// DiffDatasets calculates diffs between two datasets and returns a
-// dataset. Differences are checked in order of descending scope
-// - dataset.Dataset.path
-// - dataset.Dataset.Structure.path
-// - dataset.Dataset.Data.path
-// TODO: make diffs non-trivial
-func DiffDatasets(a, b *dataset.Dataset) (*DiffList, error) {
-	diffList := &DiffList{}
-	// Compare Structure
-	structureDiffList, err := diffStructure(a, b)
-	if err != nil {
-		return nil, err
-	}
-	if len(structureDiffList.diffs) > 0 {
-		diffList.diffs = append(diffList.diffs, structureDiffList.diffs...)
-	}
-	// Compare Data
-	dataDiffList, err := diffData(a, b)
-	if err != nil {
-		return nil, err
-	}
-	if len(dataDiffList.diffs) > 0 {
-		diffList.diffs = append(diffList.diffs, dataDiffList.diffs...)
-	}
-	// Compare Metadata
-	metaDiffList, err := diffMeta(a, b)
-	if err != nil {
-		return nil, err
-	}
-	if len(metaDiffList.diffs) > 0 {
-		diffList.diffs = append(diffList.diffs, metaDiffList.diffs...)
-	}
-	// Compare Transform
-	transformDiffList, err := diffTransform(a, b)
-	if err != nil {
-		return nil, err
-	}
-	if len(transformDiffList.diffs) > 0 {
-		diffList.diffs = append(diffList.diffs, transformDiffList.diffs...)
-	}
-	// Compare VisConfig
-	visConfigDiffList, err := diffVisConfig(a, b)
-	if err != nil {
-		return nil, err
-	}
-	if len(visConfigDiffList.diffs) > 0 {
-		diffList.diffs = append(diffList.diffs, visConfigDiffList.diffs...)
-	}
-	return diffList, nil
 }

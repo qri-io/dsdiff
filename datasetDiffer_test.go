@@ -1,13 +1,17 @@
 package datasetDiffer
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	// "path/filepath"
 	"testing"
-	// 	"github.com/qri-io/qri"
-	// 	testrepo "github.com/qri-io/qri/repo/test"
+
+	// "github.com/qri-io/cafs/memfs"
 	"github.com/qri-io/dataset"
+	// "github.com/qri-io/dataset/dsfs"
+	// "github.com/qri-io/qri/core"
+	// "github.com/qri-io/qri/repo"
+	// testrepo "github.com/qri-io/qri/repo/test"
 )
 
 func loadTestData(path string) (*dataset.Dataset, error) {
@@ -24,45 +28,33 @@ func loadTestData(path string) (*dataset.Dataset, error) {
 }
 
 func TestDiffDataset(t *testing.T) {
-	//setup
-
 	//test cases
 	cases := []struct {
-		dsPathA  string
-		dsPathB  string
-		expected string
-		err      string
+		dsLeftPath, dsRightPath string
+		expected                string
+		err                     string
 	}{
-		{"testdata/orig.json", "testdata/orig.json", "", ""},
-		{"testdata/orig.json", "testdata/newData.json", "Data Changed.", ""},
-		{"testdata/orig.json", "testdata/newStructure.json", "Structure Changed.", ""},
-		{"testdata/oldChecksum.json", "testdata/newChecksum.json", "Structure Changed.", ""},
-		{"testdata/orig.json", "testdata/newDataAndStructure.json", "Structure Changed.", ""},
-		{"testdata/orig.json", "testdata/blankStructure.json", "", "error: structure path cannot be empty string"},
-		{"testdata/orig.json", "testdata/blankData.json", "", "error: data path cannot be empty string"},
-		{"testdata/orig_with_meta.json", "testdata/newTitle.json", "Title Changed.", ""},
-		{"testdata/orig_with_meta.json", "testdata/newDescription.json", "Description Changed.", ""},
-		//TODO: test transform change (need path)
-		// {"orig_with_vis_config_and_transform.json", "orig_with_vis_config_and_transform.json", "Transform Changed.", ""}
-		//TODO: test visconfig change (need path)
-		// {"orig_with_vis_config_and_transform.json", "orig_with_vis_config_and_transform.json", "VisConfig Changed.", ""}
+		{"testdata/orig.json", "testdata/newStructure.json", "Structure Changed. (3 changes)", ""},
+		{"testdata/orig.json", "testdata/newTitle.json", "Metadata Changed. (1 changes)", ""},
+		{"testdata/orig.json", "testdata/newDescription.json", "Metadata Changed. (1 changes)", ""},
+		{"testdata/orig.json", "testdata/newVisConfig.json", "VisConfig Changed. (1 changes)", ""},
+		// {"testdata/orig.json", "testdata/newTransform.json", "Transform Changed. (1 changes)", ""},
+		// {"testdata/orig.json", "testdata/newData.json", "Data Changed. (1 changes)", ""},
 	}
-	// load files and execute tests
+	// execute
 	for i, c := range cases {
-		pathA := c.dsPathA
-		pathB := c.dsPathB
-		//load data
-		dsA, err := loadTestData(pathA)
+		//Load data
+		dsLeft, err := loadTestData(c.dsLeftPath)
 		if err != nil {
-			t.Errorf("case %d error: error loading file '%s'", i, pathA)
+			t.Errorf("case %d error: error loading file '%s'", i, c.dsLeftPath)
 			return
 		}
-		dsB, err := loadTestData(pathB)
+		dsRight, err := loadTestData(c.dsRightPath)
 		if err != nil {
-			t.Errorf("case %d error: error loading file '%s'", i, pathB)
+			t.Errorf("case %d error: error loading file '%s'", i, c.dsRightPath)
 			return
 		}
-		got, err := DiffDatasets(dsA, dsB)
+		got, err := DiffDatasets(dsLeft, dsRight)
 		if err != nil {
 			if err.Error() == c.err {
 				continue
@@ -70,11 +62,71 @@ func TestDiffDataset(t *testing.T) {
 				t.Errorf("case %d error mismatch: expected '%s', got '%s'", i, c.err, err.Error())
 				return
 			}
-
 		}
-		if got.String() != c.expected {
-			t.Errorf("case %d response mismatch.  expected '%s', got '%s'", i, c.expected, got.String())
-			continue
+		stringDiffs := MapDiffsToString(got)
+		if i == 4 {
+			// for k, v := range got {
+			// 	fmt.Printf("%s: %s\n---\n", k, v)
+			// }
+			if dsLeft.Transform == nil {
+				fmt.Println("left transform nil")
+			}
+			if dsRight.Transform == nil {
+				fmt.Println("right transform nil")
+			}
+		}
+
+		if stringDiffs != c.expected {
+			t.Errorf("case %d response mistmatch: expected '%s', got '%s'", i, c.expected, stringDiffs)
+		}
+	}
+}
+
+func TestDiffJSON(t *testing.T) {
+	//test cases
+	cases := []struct {
+		dsLeftPath, dsRightPath string
+		description             string
+		expected                string
+		err                     string
+	}{
+		{"testdata/orig.json", "testdata/newStructure.json", "abc", "1 diffs", ""},
+	}
+	// execute
+	for i, c := range cases {
+		//Load data
+		a, err := loadTestData(c.dsLeftPath)
+		if err != nil {
+			t.Errorf("case %d error: error loading file '%s'", i, c.dsLeftPath)
+			return
+		}
+		b, err := loadTestData(c.dsRightPath)
+		if err != nil {
+			t.Errorf("case %d error: error loading file '%s'", i, c.dsRightPath)
+			return
+		}
+		aBytes, err := json.Marshal(a)
+		if err != nil {
+			t.Errorf("error marshalling structure a: %s", err.Error())
+			return
+		}
+		bBytes, err := json.Marshal(b)
+		if err != nil {
+			t.Errorf("error marshalling structure b: %s", err.Error())
+			return
+		}
+		got, err := DiffJSON(aBytes, bBytes)
+		if err != nil {
+			if err.Error() == c.err {
+				continue
+			} else {
+				t.Errorf("case %d error mismatch: expected '%s', got '%s'", i, c.err, err.Error())
+				return
+			}
+		}
+		stringDiffs := fmt.Sprintf("%d diffs", len(got.Deltas()))
+		if stringDiffs != c.expected {
+			t.Errorf("case %d response mistmatch: expected '%s', got '%s'", i, c.expected, stringDiffs)
 		}
 	}
 }
