@@ -168,6 +168,16 @@ func DiffDatasets(a, b *dataset.Dataset) (map[string]diff.Diff, error) {
 	return result, nil
 }
 
+// DiffJSON diffs two json files independent of any Dataset structures
+func DiffJSON(a, b []byte) (diff.Diff, error) {
+	differ := diff.New()
+	d, err := differ.Compare(a, b)
+	if err != nil {
+		return nil, fmt.Errorf("error comparing json: %s", err.Error())
+	}
+	return d, nil
+}
+
 // MapDiffsToString generates a string description from a map of diffs
 // Currently the String generated reflects the first/highest priority
 // change made.  The priority of changes currently are
