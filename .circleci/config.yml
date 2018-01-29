@@ -19,6 +19,7 @@ jobs:
             go get -v -d -u
             github.com/jstemmer/go-junit-report 
             github.com/qri-io/dataset
+            github.com/yudai/gojsondiff
       - run: 
           name: Run Lint Tests
           command: golint -set_exit_status ./... 
