@@ -186,43 +186,101 @@ func DiffJSON(a, b []byte) (diff.Diff, error) {
 //   3. dataset.Transform
 //   4. dataset.Meta
 //   5. Dataset.VisConfig
+// func MapDiffsToString(m map[string]diff.Diff) string {
+// 	if m["structure"] != nil {
+// 		structureDiffs := m["structure"]
+// 		deltas := structureDiffs.Deltas()
+// 		if len(deltas) > 0 {
+// 			// for i, d := range deltas {
+// 			// 	fmt.Printf("%d. %s: (%T)\n", i+1, d)
+// 			// }
+// 			return fmt.Sprintf("Structure Changed. (%d changes)", len(deltas))
+// 		}
+// 	}
+// 	if m["data"] != nil {
+// 		dataDiffs := m["data"]
+// 		deltas := dataDiffs.Deltas()
+// 		if len(deltas) > 0 {
+// 			return fmt.Sprintf("Data Changed. (%d changes)", len(deltas))
+// 		}
+// 	}
+// 	if m["transform"] != nil {
+// 		transformDiffs := m["transform"]
+// 		deltas := transformDiffs.Deltas()
+// 		if len(deltas) > 0 {
+// 			return fmt.Sprintf("Transform Changed. (%d changes)", len(deltas))
+// 		}
+// 	}
+// 	if m["meta"] != nil {
+// 		metaDiffs := m["meta"]
+// 		deltas := metaDiffs.Deltas()
+// 		if len(deltas) > 0 {
+// 			return fmt.Sprintf("Metadata Changed. (%d changes)", len(deltas))
+// 		}
+// 	}
+// 	if m["visConfig"] != nil {
+// 		visConfigDiffs := m["visConfig"]
+// 		deltas := visConfigDiffs.Deltas()
+// 		if len(deltas) > 0 {
+// 			return fmt.Sprintf("VisConfig Changed. (%d changes)", len(deltas))
+// 		}
+// 	}
+// 	return ""
+// }
 func MapDiffsToString(m map[string]diff.Diff) string {
 	if m["structure"] != nil {
 		structureDiffs := m["structure"]
 		deltas := structureDiffs.Deltas()
 		if len(deltas) > 0 {
-			// for i, d := range deltas {
-			// 	fmt.Printf("%d. %s: (%T)\n", i+1, d)
-			// }
-			return fmt.Sprintf("Structure Changed. (%d changes)", len(deltas))
+			namedDiffs := ""
+			for _, d := range deltas {
+				namedDiffs = namedDiffs + fmt.Sprintf("\n\t- modified %s", d)
+			}
+			return fmt.Sprintf("Structure: %d changes%s", len(deltas), namedDiffs)
 		}
 	}
 	if m["data"] != nil {
 		dataDiffs := m["data"]
 		deltas := dataDiffs.Deltas()
 		if len(deltas) > 0 {
-			return fmt.Sprintf("Data Changed. (%d changes)", len(deltas))
+			namedDiffs := ""
+			for _, d := range deltas {
+				namedDiffs = namedDiffs + fmt.Sprintf("\n\t- modified %s", d)
+			}
+			return fmt.Sprintf("Data: %d changes%s", len(deltas), namedDiffs)
 		}
 	}
 	if m["transform"] != nil {
 		transformDiffs := m["transform"]
 		deltas := transformDiffs.Deltas()
 		if len(deltas) > 0 {
-			return fmt.Sprintf("Transform Changed. (%d changes)", len(deltas))
+			namedDiffs := ""
+			for _, d := range deltas {
+				namedDiffs = namedDiffs + fmt.Sprintf("\n\t- modified %s", d)
+			}
+			return fmt.Sprintf("Transform: %d changes%s", len(deltas), namedDiffs)
 		}
 	}
 	if m["meta"] != nil {
 		metaDiffs := m["meta"]
 		deltas := metaDiffs.Deltas()
 		if len(deltas) > 0 {
-			return fmt.Sprintf("Metadata Changed. (%d changes)", len(deltas))
+			namedDiffs := ""
+			for _, d := range deltas {
+				namedDiffs = namedDiffs + fmt.Sprintf("\n\t- modified %s", d)
+			}
+			return fmt.Sprintf("Meta: %d changes%s", len(deltas), namedDiffs)
 		}
 	}
 	if m["visConfig"] != nil {
 		visConfigDiffs := m["visConfig"]
 		deltas := visConfigDiffs.Deltas()
 		if len(deltas) > 0 {
-			return fmt.Sprintf("VisConfig Changed. (%d changes)", len(deltas))
+			namedDiffs := ""
+			for _, d := range deltas {
+				namedDiffs = namedDiffs + fmt.Sprintf("\n\t- modified %s", d)
+			}
+			return fmt.Sprintf("VisConfig: %d changes%s", len(deltas), namedDiffs)
 		}
 	}
 	return ""
