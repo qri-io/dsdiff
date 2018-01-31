@@ -34,10 +34,10 @@ func TestDiffDataset(t *testing.T) {
 		expected                string
 		err                     string
 	}{
-		{"testdata/orig.json", "testdata/newStructure.json", "Structure Changed. (3 changes)", ""},
-		{"testdata/orig.json", "testdata/newTitle.json", "Metadata Changed. (1 changes)", ""},
-		{"testdata/orig.json", "testdata/newDescription.json", "Metadata Changed. (1 changes)", ""},
-		{"testdata/orig.json", "testdata/newVisConfig.json", "VisConfig Changed. (1 changes)", ""},
+		{"testdata/orig.json", "testdata/newStructure.json", "Structure: 3 changes\n\t- modified checksum\n\t- modified entries\n\t- modified schema", ""},
+		{"testdata/orig.json", "testdata/newTitle.json", "Meta: 1 changes\n\t- modified title", ""},
+		{"testdata/orig.json", "testdata/newDescription.json", "Meta: 1 changes\n\t- modified description", ""},
+		{"testdata/orig.json", "testdata/newVisConfig.json", "VisConfig: 1 changes\n\t- modified format", ""},
 		// {"testdata/orig.json", "testdata/newTransform.json", "Transform Changed. (1 changes)", ""},
 		// {"testdata/orig.json", "testdata/newData.json", "Data Changed. (1 changes)", ""},
 	}
@@ -64,17 +64,15 @@ func TestDiffDataset(t *testing.T) {
 			}
 		}
 		stringDiffs := MapDiffsToString(got)
-		if i == 4 {
-			// for k, v := range got {
-			// 	fmt.Printf("%s: %s\n---\n", k, v)
-			// }
-			if dsLeft.Transform == nil {
-				fmt.Println("left transform nil")
-			}
-			if dsRight.Transform == nil {
-				fmt.Println("right transform nil")
-			}
-		}
+		// if i == 0 {
+		// 	s, err := MapDiffsToFormattedString(got, dsLeft)
+		// 	if err != nil {
+		// 		t.Errorf("not today: %s", err.Error())
+		// 	}
+		// 	fmt.Println("--------------------------")
+		// 	fmt.Print(s)
+		// 	fmt.Println("--------------------------")
+		// }
 
 		if stringDiffs != c.expected {
 			t.Errorf("case %d response mistmatch: expected '%s', got '%s'", i, c.expected, stringDiffs)
