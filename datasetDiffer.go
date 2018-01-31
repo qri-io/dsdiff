@@ -84,14 +84,17 @@ func DiffMeta(a, b *dataset.Meta) (diff.Diff, error) {
 		if a.Path() == b.Path() {
 			return emptyDiff, nil
 		}
+	} else if a.IsEmpty() && b.IsEmpty() {
+		return emptyDiff, nil
 	}
-	aBytes, err := json.Marshal(a)
+
+	aBytes, err := a.MarshalJSONObject()
 	if err != nil {
-		return nil, fmt.Errorf("error marshalling meta a: %s", err.Error())
+		return nil, fmt.Errorf("error marshaling meta a: %s", err.Error())
 	}
-	bBytes, err := json.Marshal(b)
+	bBytes, err := b.MarshalJSONObject()
 	if err != nil {
-		return nil, fmt.Errorf("error marshalling meta b: %s", err.Error())
+		return nil, fmt.Errorf("error marshaling meta b: %s", err.Error())
 	}
 	d, err := differ.Compare(aBytes, bBytes)
 	if err != nil {
