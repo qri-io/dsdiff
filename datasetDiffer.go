@@ -3,15 +3,86 @@ package datasetDiffer
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/qri-io/dataset"
-	diff "github.com/yudai/gojsondiff"
+	jdiff "github.com/yudai/gojsondiff"
+	"github.com/yudai/gojsondiff/formatter"
 )
 
+// SubDiff holds the diffs of a Dataset Subcomponent diff
+type SubDiff struct {
+	jdiff.Diff
+	kind string
+	a, b []byte
+}
+
+// SummarizeToString outputs a substring in a one of a few formats
+// - simple (single line describing which component and how many
+//   changes)
+// - listKeys (lists the keys of what changed)
+// - plusMinusColor (git-style plus/minus printout)
+// - plusMinus (same as plusMinusColor without color)
+func (d *SubDiff) SummarizeToString(how string) (string, error) {
+	color := false
+	if strings.Contains(how, "Color") {
+		color = true
+	}
+	pluralS := ""
+	if d != nil && d.Deltas() != nil && len(d.Deltas()) > 1 {
+		pluralS = "s"
+	}
+	switch how {
+	case "simple":
+		if d.Modified() {
+			componentTitle := strings.Title(d.kind)
+			return fmt.Sprintf("%s Changed. (%d change%s)", componentTitle, len(d.Deltas()), pluralS), nil
+		}
+	case "listKeys":
+		if d.Modified() {
+			componentTitle := strings.Title(d.kind)
+			namedDiffs := ""
+			for _, del := range d.Deltas() {
+				namedDiffs = fmt.Sprintf("%s\n\t- modified %s", namedDiffs, del)
+			}
+			return fmt.Sprintf("%s: %d change%s%s", componentTitle, len(d.Deltas()), pluralS, namedDiffs), nil
+		}
+	case "plusMinusColor", "plusMinus":
+		if d.Modified() {
+			var aJson map[string]interface{}
+			err := json.Unmarshal(d.a, &aJson)
+			if err != nil {
+				return "", fmt.Errorf("error summarizing: %s", err.Error())
+			}
+			config := formatter.AsciiFormatterConfig{
+				ShowArrayIndex: true,
+				Coloring:       color,
+			}
+			form := formatter.NewAsciiFormatter(aJson, config)
+			diffString, err := form.Format(d)
+			if err != nil {
+				return "", fmt.Errorf("error summarizing: %s", err.Error())
+			}
+			return diffString, nil
+		}
+	case "delta":
+		if d.Modified() {
+			form := formatter.NewDeltaFormatter()
+			diffString, err := form.Format(d)
+			if err != nil {
+				return "", fmt.Errorf("error summarizing: %s", err.Error())
+			}
+			return diffString, nil
+		}
+	default:
+		return "", nil
+	}
+	return "", nil
+}
+
 // DiffStructure diffs the structure of two datasets
-func DiffStructure(a, b *dataset.Structure) (diff.Diff, error) {
-	var emptyDiff diff.Diff
-	differ := diff.New()
+func DiffStructure(a, b *dataset.Structure) (*SubDiff, error) {
+	var emptyDiff = &SubDiff{kind: "structure"}
 	if len(a.Path().String()) > 1 && len(b.Path().String()) > 1 {
 		if a.Path() == b.Path() {
 			return emptyDiff, nil
@@ -32,17 +103,13 @@ func DiffStructure(a, b *dataset.Structure) (diff.Diff, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling structure b: %s", err.Error())
 	}
-	d, err := differ.Compare(aBytes, bBytes)
-	if err != nil {
-		return nil, fmt.Errorf("error comparing structure: %s", err.Error())
-	}
-	return d, nil
+	return DiffJSON(aBytes, bBytes, emptyDiff.kind)
 }
 
 // DiffData diffs the data of two datasets
-func DiffData(a, b *dataset.Dataset) (diff.Diff, error) {
-	var emptyDiff diff.Diff
-	// differ := diff.New()
+func DiffData(a, b *dataset.Dataset) (*SubDiff, error) {
+	var emptyDiff = &SubDiff{kind: "data"}
+	// differ := jdiff.New()
 	if len(a.DataPath) > 1 && len(b.DataPath) > 1 {
 		if a.DataPath == b.DataPath {
 			return emptyDiff, nil
@@ -53,9 +120,8 @@ func DiffData(a, b *dataset.Dataset) (diff.Diff, error) {
 }
 
 // DiffTransform diffs the transform struct of two datasets
-func DiffTransform(a, b *dataset.Transform) (diff.Diff, error) {
-	var emptyDiff diff.Diff
-	differ := diff.New()
+func DiffTransform(a, b *dataset.Transform) (*SubDiff, error) {
+	var emptyDiff = &SubDiff{kind: "transform"}
 	if len(a.Path().String()) > 1 && len(b.Path().String()) > 1 {
 		if a.Path() == b.Path() {
 			return emptyDiff, nil
@@ -69,17 +135,12 @@ func DiffTransform(a, b *dataset.Transform) (diff.Diff, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling transform b: %s", err.Error())
 	}
-	d, err := differ.Compare(aBytes, bBytes)
-	if err != nil {
-		return nil, fmt.Errorf("error comparing transforms: %s", err.Error())
-	}
-	return d, nil
+	return DiffJSON(aBytes, bBytes, emptyDiff.kind)
 }
 
 // DiffMeta diffs the metadata of two datasets
-func DiffMeta(a, b *dataset.Meta) (diff.Diff, error) {
-	var emptyDiff diff.Diff
-	differ := diff.New()
+func DiffMeta(a, b *dataset.Meta) (*SubDiff, error) {
+	var emptyDiff = &SubDiff{kind: "meta"}
 	if len(a.Path().String()) > 1 && len(b.Path().String()) > 1 {
 		if a.Path() == b.Path() {
 			return emptyDiff, nil
@@ -87,26 +148,25 @@ func DiffMeta(a, b *dataset.Meta) (diff.Diff, error) {
 	} else if a.IsEmpty() && b.IsEmpty() {
 		return emptyDiff, nil
 	}
-
-	aBytes, err := a.MarshalJSONObject()
+	aBytes, err := json.Marshal(a)
 	if err != nil {
-		return nil, fmt.Errorf("error marshaling meta a: %s", err.Error())
+		return nil, fmt.Errorf("error marshalling meta a: %s", err.Error())
 	}
-	bBytes, err := b.MarshalJSONObject()
+	bBytes, err := json.Marshal(b)
 	if err != nil {
-		return nil, fmt.Errorf("error marshaling meta b: %s", err.Error())
+		return nil, fmt.Errorf("error marshalling meta b: %s", err.Error())
 	}
-	d, err := differ.Compare(aBytes, bBytes)
-	if err != nil {
-		return nil, fmt.Errorf("error comparing Meta: %s", err.Error())
-	}
-	return d, nil
+	// fmt.Println("--------")
+	// fmt.Println(aBytes)
+	// fmt.Println("--------")
+	// fmt.Println(bBytes)
+	// fmt.Println("--------")
+	return DiffJSON(aBytes, bBytes, emptyDiff.kind)
 }
 
 // DiffVisConfig diffs the dataset.VisConfig structs of two datasets
-func DiffVisConfig(a, b *dataset.VisConfig) (diff.Diff, error) {
-	var emptyDiff diff.Diff
-	differ := diff.New()
+func DiffVisConfig(a, b *dataset.VisConfig) (*SubDiff, error) {
+	var emptyDiff = &SubDiff{kind: "visConfig"}
 	if len(a.Path().String()) > 1 && len(b.Path().String()) > 1 {
 		if a.Path() == b.Path() {
 			return emptyDiff, nil
@@ -120,37 +180,63 @@ func DiffVisConfig(a, b *dataset.VisConfig) (diff.Diff, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling visConfig b: %s", err.Error())
 	}
-	d, err := differ.Compare(aBytes, bBytes)
-	if err != nil {
-		return nil, fmt.Errorf("error comparing VisConfigs: %s", err.Error())
-	}
-	return d, nil
+	return DiffJSON(aBytes, bBytes, emptyDiff.kind)
 }
 
-// DiffDatasets returns a map of diffs of the components of a dataset
-func DiffDatasets(a, b *dataset.Dataset) (map[string]diff.Diff, error) {
-	result := map[string]diff.Diff{}
+//DiffJSON diffs two json byte slices and returns a SubDiff pointer
+func DiffJSON(a, b []byte, kind string) (*SubDiff, error) {
+	// var emptyDiff = &SubDiff{kind: kind}
+	differ := jdiff.New()
+	// emptyDiff, err := differ.Compare([]byte("{1:1}", "{1:1}"))
+	// if err
+	d, err := differ.Compare(a, b)
+	if err != nil {
+		// return emptyDiff, fmt.Errorf("error comparing %s: %s", kind, err.Error())
+		return nil, fmt.Errorf("error comparing %s: %s", kind, err.Error())
+	}
+	subDiff := &SubDiff{d, kind, a, b}
+	return subDiff, nil
+}
+
+// StructuredDataTuple provides an additional input for DiffDatasets
+// to use fully de-referenced dataset.data so that we can consider
+// changes in dataset.Data beyond the hash/path being similar or
+// different
+type StructuredDataTuple struct {
+	a, b *[]byte
+}
+
+// DiffDatasets returns a map of pointers to diffs of the components
+// of a dataset.  It calls each of the Diff{Component} functions and
+// adds the option for including de-referenced dataset.Data via
+// the StructuredDataTuple
+func DiffDatasets(a, b *dataset.Dataset, deRefData *StructuredDataTuple) (map[string]*SubDiff, error) {
+	result := make(map[string]*SubDiff)
 	//diff structure
 	if a.Structure != nil && b.Structure != nil {
 		structureDiffs, err := DiffStructure(a.Structure, b.Structure)
 		if err != nil {
-			return nil, err
+			return result, err
 		}
-		result["structure"] = structureDiffs
+		if structureDiffs.Diff != nil {
+			result[structureDiffs.kind] = structureDiffs
+		}
 	}
 	// diff data
-	dataDiffs, err := DiffData(a, b)
-	if err != nil {
-		return nil, err
-	}
-	result["data"] = dataDiffs
-	// diff transform
-	if a.Transform != nil && b.Transform != nil {
-		transformDiffs, err := DiffTransform(a.Transform, b.Transform)
+	if deRefData != nil {
+		dataDiffs, err := DiffJSON(*deRefData.a, *deRefData.b, "data")
 		if err != nil {
 			return nil, err
 		}
-		result["transform"] = transformDiffs
+		result[dataDiffs.kind] = dataDiffs
+	} else {
+		dataDiffs, err := DiffData(a, b)
+		if err != nil {
+			return nil, err
+		}
+		if dataDiffs.Diff != nil {
+			result[dataDiffs.kind] = dataDiffs
+		}
 	}
 	// diff meta
 	if a.Meta != nil && b.Meta != nil {
@@ -158,7 +244,19 @@ func DiffDatasets(a, b *dataset.Dataset) (map[string]diff.Diff, error) {
 		if err != nil {
 			return nil, err
 		}
-		result["meta"] = metaDiffs
+		if metaDiffs.Diff != nil {
+			result[metaDiffs.kind] = metaDiffs
+		}
+	}
+	// diff transform
+	if a.Transform != nil && b.Transform != nil {
+		transformDiffs, err := DiffTransform(a.Transform, b.Transform)
+		if err != nil {
+			return nil, err
+		}
+		if transformDiffs.Diff != nil {
+			result[transformDiffs.kind] = transformDiffs
+		}
 	}
 	// diff visConfig
 	if a.VisConfig != nil && b.VisConfig != nil {
@@ -166,125 +264,44 @@ func DiffDatasets(a, b *dataset.Dataset) (map[string]diff.Diff, error) {
 		if err != nil {
 			return nil, err
 		}
-		result["visConfig"] = visConfigDiffs
+		if visConfigDiffs.Diff != nil {
+			result[visConfigDiffs.kind] = visConfigDiffs
+		}
 	}
 	return result, nil
-}
-
-// DiffJSON diffs two json files independent of any Dataset structures
-func DiffJSON(a, b []byte) (diff.Diff, error) {
-	differ := diff.New()
-	d, err := differ.Compare(a, b)
-	if err != nil {
-		return nil, fmt.Errorf("error comparing json: %s", err.Error())
-	}
-	return d, nil
 }
 
 // MapDiffsToString generates a string description from a map of diffs
 // Currently the String generated reflects the first/highest priority
 // change made.  The priority of changes currently are
 //   1. dataset.Structure
-//   2. dataset.{Data} // TODO: use dereferenced data
+//   2. dataset.{Data}
 //   3. dataset.Transform
 //   4. dataset.Meta
 //   5. Dataset.VisConfig
-// func MapDiffsToString(m map[string]diff.Diff) string {
-// 	if m["structure"] != nil {
-// 		structureDiffs := m["structure"]
-// 		deltas := structureDiffs.Deltas()
-// 		if len(deltas) > 0 {
-// 			// for i, d := range deltas {
-// 			// 	fmt.Printf("%d. %s: (%T)\n", i+1, d)
-// 			// }
-// 			return fmt.Sprintf("Structure Changed. (%d changes)", len(deltas))
-// 		}
-// 	}
-// 	if m["data"] != nil {
-// 		dataDiffs := m["data"]
-// 		deltas := dataDiffs.Deltas()
-// 		if len(deltas) > 0 {
-// 			return fmt.Sprintf("Data Changed. (%d changes)", len(deltas))
-// 		}
-// 	}
-// 	if m["transform"] != nil {
-// 		transformDiffs := m["transform"]
-// 		deltas := transformDiffs.Deltas()
-// 		if len(deltas) > 0 {
-// 			return fmt.Sprintf("Transform Changed. (%d changes)", len(deltas))
-// 		}
-// 	}
-// 	if m["meta"] != nil {
-// 		metaDiffs := m["meta"]
-// 		deltas := metaDiffs.Deltas()
-// 		if len(deltas) > 0 {
-// 			return fmt.Sprintf("Metadata Changed. (%d changes)", len(deltas))
-// 		}
-// 	}
-// 	if m["visConfig"] != nil {
-// 		visConfigDiffs := m["visConfig"]
-// 		deltas := visConfigDiffs.Deltas()
-// 		if len(deltas) > 0 {
-// 			return fmt.Sprintf("VisConfig Changed. (%d changes)", len(deltas))
-// 		}
-// 	}
-// 	return ""
-// }
-func MapDiffsToString(m map[string]diff.Diff) string {
-	if m["structure"] != nil {
-		structureDiffs := m["structure"]
-		deltas := structureDiffs.Deltas()
-		if len(deltas) > 0 {
-			namedDiffs := ""
-			for _, d := range deltas {
-				namedDiffs = namedDiffs + fmt.Sprintf("\n\t- modified %s", d)
+func MapDiffsToString(m map[string]*SubDiff, how string) (string, error) {
+	keys := []string{
+		"structure",
+		"data",
+		"transform",
+		"meta",
+		"visConfig",
+	}
+	// for _, key := range keys {
+	// 	val, ok := m[key]
+	// 	fmt.Printf("%s: %s, %t\n===\n", key, val, ok)
+	// }
+	for _, key := range keys {
+		diffs, ok := m[key]
+		if ok && diffs != nil {
+			summary, err := diffs.SummarizeToString(how)
+			if err != nil {
+				return "", fmt.Errorf("error summarizing %s: %s", diffs.kind, err.Error())
 			}
-			return fmt.Sprintf("Structure: %d changes%s", len(deltas), namedDiffs)
+			if summary != "" {
+				return summary, nil
+			}
 		}
 	}
-	if m["data"] != nil {
-		dataDiffs := m["data"]
-		deltas := dataDiffs.Deltas()
-		if len(deltas) > 0 {
-			namedDiffs := ""
-			for _, d := range deltas {
-				namedDiffs = namedDiffs + fmt.Sprintf("\n\t- modified %s", d)
-			}
-			return fmt.Sprintf("Data: %d changes%s", len(deltas), namedDiffs)
-		}
-	}
-	if m["transform"] != nil {
-		transformDiffs := m["transform"]
-		deltas := transformDiffs.Deltas()
-		if len(deltas) > 0 {
-			namedDiffs := ""
-			for _, d := range deltas {
-				namedDiffs = namedDiffs + fmt.Sprintf("\n\t- modified %s", d)
-			}
-			return fmt.Sprintf("Transform: %d changes%s", len(deltas), namedDiffs)
-		}
-	}
-	if m["meta"] != nil {
-		metaDiffs := m["meta"]
-		deltas := metaDiffs.Deltas()
-		if len(deltas) > 0 {
-			namedDiffs := ""
-			for _, d := range deltas {
-				namedDiffs = namedDiffs + fmt.Sprintf("\n\t- modified %s", d)
-			}
-			return fmt.Sprintf("Meta: %d changes%s", len(deltas), namedDiffs)
-		}
-	}
-	if m["visConfig"] != nil {
-		visConfigDiffs := m["visConfig"]
-		deltas := visConfigDiffs.Deltas()
-		if len(deltas) > 0 {
-			namedDiffs := ""
-			for _, d := range deltas {
-				namedDiffs = namedDiffs + fmt.Sprintf("\n\t- modified %s", d)
-			}
-			return fmt.Sprintf("VisConfig: %d changes%s", len(deltas), namedDiffs)
-		}
-	}
-	return ""
+	return "", nil
 }

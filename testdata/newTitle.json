@@ -11,6 +11,17 @@
     },
     "length": 1582,
     "qri": "st:0",
+    "transform": {
+      "syntax": "python",
+      "data": "abc",
+      "config": {
+        "option": "value"
+      }
+    },
+    "Commit": {
+      "title": "abc"
+    },
+    "PreviousPath": "",
     "schema": {
       "items": {
         "items": [
@@ -37,7 +48,7 @@
     }
   },
   "meta": {
-    "title": "Data Data Data",
+    "title": "data data data",
     "description": "I am a dataset"
   },
   "visConfig": {
