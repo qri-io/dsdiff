@@ -49,8 +49,8 @@ func (d *SubDiff) SummarizeToString(how string) (string, error) {
 		}
 	case "plusMinusColor", "plusMinus":
 		if d.Modified() {
-			var aJson map[string]interface{}
-			err := json.Unmarshal(d.a, &aJson)
+			var aJSON map[string]interface{}
+			err := json.Unmarshal(d.a, &aJSON)
 			if err != nil {
 				return "", fmt.Errorf("error summarizing: %s", err.Error())
 			}
@@ -58,7 +58,7 @@ func (d *SubDiff) SummarizeToString(how string) (string, error) {
 				ShowArrayIndex: true,
 				Coloring:       color,
 			}
-			form := formatter.NewAsciiFormatter(aJson, config)
+			form := formatter.NewAsciiFormatter(aJSON, config)
 			diffString, err := form.Format(d)
 			if err != nil {
 				return "", fmt.Errorf("error summarizing: %s", err.Error())
