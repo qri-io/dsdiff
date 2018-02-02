@@ -2,6 +2,14 @@
   "kind": "qri:ds:0",
   "DataPath": "abc",
   "path": "123",
+  "transform": {
+    "appVersion": "0.1.0",
+    "syntax": "sql",
+    "data": "xyz",
+    "config": {
+      "option": "new_value"
+    }
+  },
   "structure": {
     "checksum": "QmRSLr53cRGhkwx1L3uGNCY7QGvup3XGy9Jcud9",
     "entries": 33,
@@ -11,13 +19,6 @@
     },
     "length": 1582,
     "qri": "st:0",
-    "transform": {
-      "syntax": "python",
-      "data": "abc",
-      "config": {
-        "new_option": "new_value"
-      }
-    },
     "Commit": {
       "title": "abc"
     },

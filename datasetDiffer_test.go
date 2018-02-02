@@ -30,11 +30,53 @@ func TestDiffDataset(t *testing.T) {
 		expected                string
 		err                     string
 	}{
-		{"testdata/orig.json", "testdata/newStructure.json", "listKeys", "Structure: 3 changes\n\t- modified checksum\n\t- modified entries\n\t- modified schema", ""},
+		{"testdata/orig.json", "testdata/newStructure.json", "simple", "Structure Changed. (3 changes)", ""},
+		{"testdata/orig.json", "testdata/newStructure.json", "delta", `{
+  "checksum": [
+    "@@ -33,7 +33,7 @@\n y9Jc\n-ud9\n+aaa\n",
+    0,
+    2
+  ],
+  "entries": [
+    33,
+    35
+  ],
+  "schema": {
+    "items": {
+      "items": {
+        "0": {
+          "title": [
+            "rank",
+            "ranking"
+          ]
+        },
+        "1": {
+          "title": [
+            "probability_of_automation",
+            "prob_of_automation"
+          ]
+        },
+        "_t": "a"
+      }
+    }
+  }
+}
+`, ""},
 		{"testdata/orig.json", "testdata/newTitle.json", "listKeys", "Meta: 1 change\n\t- modified title", ""},
-		{"testdata/orig.json", "testdata/newDescription.json", "listKeys", "Meta: 1 change\n\t- modified description", ""},
-		{"testdata/orig.json", "testdata/newVisConfig.json", "listKeys", "VisConfig: 1 change\n\t- modified format", ""},
-		// {"testdata/orig.json", "testdata/newTransform.json", "simple", "Transform Changed. (1 change)", ""},
+		{"testdata/orig.json", "testdata/newDescription.json", "plusMinusColor", ` {
+[30;41m-  "description": "I am a dataset",[0m
+[30;42m+  "description": "I am a new description",[0m
+   "qri": "md:0",
+   "title": "abc"
+ }
+`, ""},
+		{"testdata/orig.json", "testdata/newVisConfig.json", "plusMinus", ` {
+-  "format": "abc",
++  "format": "new thing",
+   "kind": "vc:0"
+ }
+`, ""},
+		{"testdata/orig.json", "testdata/newTransform.json", "simple", "Transform Changed. (4 changes)", ""},
 		// {"testdata/orig.json", "testdata/newData.json", "simple", "Data Changed. (1 change)", ""},
 	}
 	// execute
@@ -75,6 +117,9 @@ func TestDiffDataset(t *testing.T) {
 		// }
 
 		if stringDiffs != c.expected {
+			// texp := []byte(c.expected)
+			tgot := []byte(stringDiffs)
+			_ = ioutil.WriteFile("got0.txt", tgot, 0775)
 			t.Errorf("case %d response mistmatch: expected '%s', got '%s'", i, c.expected, stringDiffs)
 		}
 	}
@@ -88,7 +133,7 @@ func TestDiffJSON(t *testing.T) {
 		expected                string
 		err                     string
 	}{
-		{"testdata/orig.json", "testdata/newStructure.json", "abc", "1 diffs", ""},
+		{"testdata/orig.json", "testdata/newStructure.json", "abc", "2 diffs", ""},
 	}
 	// execute
 	for i, c := range cases {

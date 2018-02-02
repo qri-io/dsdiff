@@ -156,11 +156,6 @@ func DiffMeta(a, b *dataset.Meta) (*SubDiff, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling meta b: %s", err.Error())
 	}
-	// fmt.Println("--------")
-	// fmt.Println(aBytes)
-	// fmt.Println("--------")
-	// fmt.Println(bBytes)
-	// fmt.Println("--------")
 	return DiffJSON(aBytes, bBytes, emptyDiff.kind)
 }
 
@@ -185,10 +180,7 @@ func DiffVisConfig(a, b *dataset.VisConfig) (*SubDiff, error) {
 
 //DiffJSON diffs two json byte slices and returns a SubDiff pointer
 func DiffJSON(a, b []byte, kind string) (*SubDiff, error) {
-	// var emptyDiff = &SubDiff{kind: kind}
 	differ := jdiff.New()
-	// emptyDiff, err := differ.Compare([]byte("{1:1}", "{1:1}"))
-	// if err
 	d, err := differ.Compare(a, b)
 	if err != nil {
 		// return emptyDiff, fmt.Errorf("error comparing %s: %s", kind, err.Error())
