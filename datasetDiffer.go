@@ -95,11 +95,11 @@ func DiffStructure(a, b *dataset.Structure) (*SubDiff, error) {
 	}
 	// If we couldn't determine that there were no changes  using the
 	// path or checksum...
-	aBytes, err := json.Marshal(a)
+	aBytes, err := a.MarshalJSONObject()
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling structure a: %s", err.Error())
 	}
-	bBytes, err := json.Marshal(b)
+	bBytes, err := b.MarshalJSONObject()
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling structure b: %s", err.Error())
 	}
@@ -127,11 +127,11 @@ func DiffTransform(a, b *dataset.Transform) (*SubDiff, error) {
 			return emptyDiff, nil
 		}
 	}
-	aBytes, err := json.Marshal(a)
+	aBytes, err := a.MarshalJSONObject()
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling transform a: %s", err.Error())
 	}
-	bBytes, err := json.Marshal(b)
+	bBytes, err := b.MarshalJSONObject()
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling transform b: %s", err.Error())
 	}
@@ -148,11 +148,11 @@ func DiffMeta(a, b *dataset.Meta) (*SubDiff, error) {
 	} else if a.IsEmpty() && b.IsEmpty() {
 		return emptyDiff, nil
 	}
-	aBytes, err := json.Marshal(a)
+	aBytes, err := a.MarshalJSONObject()
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling meta a: %s", err.Error())
 	}
-	bBytes, err := json.Marshal(b)
+	bBytes, err := b.MarshalJSONObject()
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling meta b: %s", err.Error())
 	}
@@ -167,11 +167,11 @@ func DiffVisConfig(a, b *dataset.VisConfig) (*SubDiff, error) {
 			return emptyDiff, nil
 		}
 	}
-	aBytes, err := json.Marshal(a)
+	aBytes, err := a.MarshalJSONObject()
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling visConfig a: %s", err.Error())
 	}
-	bBytes, err := json.Marshal(b)
+	bBytes, err := b.MarshalJSONObject()
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling visConfig b: %s", err.Error())
 	}
