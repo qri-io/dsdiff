@@ -73,7 +73,7 @@ func TestDiffDataset(t *testing.T) {
 		{"testdata/orig.json", "testdata/newVisConfig.json", "plusMinus", ` {
 -  "format": "abc",
 +  "format": "new thing",
-   "qri": "vc:0"
+   "kind": "vc:0"
  }
 `, ""},
 		{"testdata/orig.json", "testdata/newTransform.json", "simple", "Transform Changed. (4 changes)", ""},
