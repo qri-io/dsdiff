@@ -83,18 +83,6 @@ func (d *SubDiff) SummarizeToString(how string) (string, error) {
 // DiffStructure diffs the structure of two datasets
 func DiffStructure(a, b *dataset.Structure) (*SubDiff, error) {
 	var emptyDiff = &SubDiff{kind: "structure"}
-	if len(a.Path().String()) > 1 && len(b.Path().String()) > 1 {
-		if a.Path() == b.Path() {
-			return emptyDiff, nil
-		}
-	}
-	if len(a.Checksum) > 1 && len(b.Checksum) > 1 {
-		if a.Checksum == b.Checksum {
-			return emptyDiff, nil
-		}
-	}
-	// If we couldn't determine that there were no changes  using the
-	// path or checksum...
 	aBytes, err := a.MarshalJSONObject()
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling structure a: %s", err.Error())
