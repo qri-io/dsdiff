@@ -1,7 +1,7 @@
 version: '2'
 jobs:
   build:
-    working_directory: /go/src/github.com/qri-io/datasetDiffer
+    working_directory: /go/src/github.com/qri-io/dsdiff
     docker:
       - image: circleci/golang:1.9
         environment:

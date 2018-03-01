@@ -1,4 +1,4 @@
-package datasetDiffer
+package dsdiff
 
 import (
 	"encoding/json"
