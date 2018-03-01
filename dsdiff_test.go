@@ -1,4 +1,4 @@
-package datasetDiffer
+package dsdiff
 
 import (
 	"encoding/json"
@@ -107,13 +107,13 @@ func TestDiffDataset(t *testing.T) {
 			return
 		}
 		// if i == 0 {
-		// 	s, err := MapDiffsToFormattedString(got, dsLeft)
-		// 	if err != nil {
-		// 		t.Errorf("not today: %s", err.Error())
-		// 	}
-		// 	fmt.Println("--------------------------")
-		// 	fmt.Print(s)
-		// 	fmt.Println("--------------------------")
+		//  s, err := MapDiffsToFormattedString(got, dsLeft)
+		//  if err != nil {
+		//    t.Errorf("not today: %s", err.Error())
+		//  }
+		//  fmt.Println("--------------------------")
+		//  fmt.Print(s)
+		//  fmt.Println("--------------------------")
 		// }
 
 		if stringDiffs != c.expected {
