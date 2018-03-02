@@ -17,6 +17,11 @@ type SubDiff struct {
 	a, b []byte
 }
 
+// MarshalJSON marshals the slice of diffs from the SubDiff
+func (d *SubDiff) MarshalJSON() ([]byte, error) {
+	return json.Marshal(d.Diff.Deltas())
+}
+
 // SummarizeToString outputs a substring in a one of a few formats
 // - simple (single line describing which component and how many
 //   changes)
