@@ -88,6 +88,15 @@ func (d *SubDiff) SummarizeToString(how string) (string, error) {
 // DiffStructure diffs the structure of two datasets
 func DiffStructure(a, b *dataset.Structure) (*SubDiff, error) {
 	var emptyDiff = &SubDiff{kind: "structure"}
+
+	if a == nil {
+		a = &dataset.Structure{}
+	}
+
+	if b == nil {
+		b = &dataset.Structure{}
+	}
+
 	aBytes, err := a.MarshalJSONObject()
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling structure a: %s", err.Error())
@@ -115,6 +124,14 @@ func DiffData(a, b *dataset.Dataset) (*SubDiff, error) {
 // DiffTransform diffs the transform struct of two datasets
 func DiffTransform(a, b *dataset.Transform) (*SubDiff, error) {
 	var emptyDiff = &SubDiff{kind: "transform"}
+
+	if a == nil {
+		a = &dataset.Transform{}
+	}
+	if b == nil {
+		b = &dataset.Transform{}
+	}
+
 	if len(a.Path().String()) > 1 && len(b.Path().String()) > 1 {
 		if a.Path() == b.Path() {
 			return emptyDiff, nil
@@ -134,6 +151,14 @@ func DiffTransform(a, b *dataset.Transform) (*SubDiff, error) {
 // DiffMeta diffs the metadata of two datasets
 func DiffMeta(a, b *dataset.Meta) (*SubDiff, error) {
 	var emptyDiff = &SubDiff{kind: "meta"}
+
+	if a == nil {
+		a = &dataset.Meta{}
+	}
+	if b == nil {
+		b = &dataset.Meta{}
+	}
+
 	if len(a.Path().String()) > 1 && len(b.Path().String()) > 1 {
 		if a.Path() == b.Path() {
 			return emptyDiff, nil
@@ -155,6 +180,14 @@ func DiffMeta(a, b *dataset.Meta) (*SubDiff, error) {
 // DiffVisConfig diffs the dataset.VisConfig structs of two datasets
 func DiffVisConfig(a, b *dataset.VisConfig) (*SubDiff, error) {
 	var emptyDiff = &SubDiff{kind: "visConfig"}
+
+	if a == nil {
+		a = &dataset.VisConfig{}
+	}
+	if b == nil {
+		b = &dataset.VisConfig{}
+	}
+
 	if len(a.Path().String()) > 1 && len(b.Path().String()) > 1 {
 		if a.Path() == b.Path() {
 			return emptyDiff, nil
@@ -198,7 +231,7 @@ type StructuredDataTuple struct {
 func DiffDatasets(a, b *dataset.Dataset, deRefData *StructuredDataTuple) (map[string]*SubDiff, error) {
 	result := make(map[string]*SubDiff)
 	//diff structure
-	if a.Structure != nil && b.Structure != nil {
+	if a.Structure != nil || b.Structure != nil {
 		structureDiffs, err := DiffStructure(a.Structure, b.Structure)
 		if err != nil {
 			return result, err
@@ -224,7 +257,7 @@ func DiffDatasets(a, b *dataset.Dataset, deRefData *StructuredDataTuple) (map[st
 		}
 	}
 	// diff meta
-	if a.Meta != nil && b.Meta != nil {
+	if a.Meta != nil || b.Meta != nil {
 		metaDiffs, err := DiffMeta(a.Meta, b.Meta)
 		if err != nil {
 			return nil, err
