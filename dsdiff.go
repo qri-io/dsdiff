@@ -112,12 +112,12 @@ func DiffStructure(a, b *dataset.Structure) (*SubDiff, error) {
 func DiffData(a, b *dataset.Dataset) (*SubDiff, error) {
 	var emptyDiff = &SubDiff{kind: "data"}
 	// differ := jdiff.New()
-	if len(a.DataPath) > 1 && len(b.DataPath) > 1 {
-		if a.DataPath == b.DataPath {
+	if len(a.BodyPath) > 1 && len(b.BodyPath) > 1 {
+		if a.BodyPath == b.BodyPath {
 			return emptyDiff, nil
 		}
 	}
-	// TODO: dereference DataPath and pass to jsondiffer
+	// TODO: dereference BodyPath and pass to jsondiffer
 	return emptyDiff, nil
 }
 

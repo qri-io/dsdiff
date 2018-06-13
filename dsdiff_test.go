@@ -76,7 +76,7 @@ func TestDiffDataset(t *testing.T) {
    "qri": "vc:0"
  }
 `, ""},
-		{"testdata/orig.json", "testdata/newTransform.json", "simple", "Transform Changed. (4 changes)", ""},
+		{"testdata/orig.json", "testdata/newTransform.json", "simple", "Transform Changed. (2 changes)", ""},
 		// {"testdata/orig.json", "testdata/newData.json", "simple", "Data Changed. (1 change)", ""},
 	}
 	// execute

@@ -1,5 +1,1 @@
- {
--  "format": "abc",
-+  "format": "new thing",
-   "qri": "vc:0"
- }
+Transform Changed. (2 changes)
