@@ -48,7 +48,7 @@
     "title": "abc",
     "description": "I am a dataset"
   },
-  "visConfig": {
+  "viz": {
     "format": "new thing"
   }
 }

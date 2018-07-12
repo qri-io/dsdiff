@@ -52,7 +52,7 @@
       "option": "value"
     }
   },
-  "visConfig": {
+  "viz": {
     "format": "abc"
   }
 }

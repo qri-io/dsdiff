@@ -73,7 +73,7 @@ func TestDiffDataset(t *testing.T) {
 		{"testdata/orig.json", "testdata/newVisConfig.json", "plusMinus", ` {
 -  "format": "abc",
 +  "format": "new thing",
-   "qri": "vc:0"
+   "qri": "vz:0"
  }
 `, ""},
 		{"testdata/orig.json", "testdata/newTransform.json", "simple", "Transform Changed. (2 changes)", ""},
@@ -133,7 +133,7 @@ func TestDiffJSON(t *testing.T) {
 		expected                string
 		err                     string
 	}{
-		{"testdata/orig.json", "testdata/newStructure.json", "abc", "2 diffs", ""},
+		{"testdata/orig.json", "testdata/newStructure.json", "abc", "3 diffs", ""},
 	}
 	// execute
 	for i, c := range cases {

@@ -177,15 +177,15 @@ func DiffMeta(a, b *dataset.Meta) (*SubDiff, error) {
 	return DiffJSON(aBytes, bBytes, emptyDiff.kind)
 }
 
-// DiffVisConfig diffs the dataset.VisConfig structs of two datasets
-func DiffVisConfig(a, b *dataset.VisConfig) (*SubDiff, error) {
+// DiffViz diffs the dataset.Viz structs of two datasets
+func DiffViz(a, b *dataset.Viz) (*SubDiff, error) {
 	var emptyDiff = &SubDiff{kind: "visConfig"}
 
 	if a == nil {
-		a = &dataset.VisConfig{}
+		a = &dataset.Viz{}
 	}
 	if b == nil {
-		b = &dataset.VisConfig{}
+		b = &dataset.Viz{}
 	}
 
 	if len(a.Path().String()) > 1 && len(b.Path().String()) > 1 {
@@ -277,8 +277,8 @@ func DiffDatasets(a, b *dataset.Dataset, deRefData *StructuredDataTuple) (map[st
 		}
 	}
 	// diff visConfig
-	if a.VisConfig != nil && b.VisConfig != nil {
-		visConfigDiffs, err := DiffVisConfig(a.VisConfig, b.VisConfig)
+	if a.Viz != nil && b.Viz != nil {
+		visConfigDiffs, err := DiffViz(a.Viz, b.Viz)
 		if err != nil {
 			return nil, err
 		}
@@ -296,7 +296,7 @@ func DiffDatasets(a, b *dataset.Dataset, deRefData *StructuredDataTuple) (map[st
 //   2. dataset.{Data}
 //   3. dataset.Transform
 //   4. dataset.Meta
-//   5. Dataset.VisConfig
+//   5. Dataset.Viz
 func MapDiffsToString(m map[string]*SubDiff, how string) (string, error) {
 	keys := []string{
 		"structure",
