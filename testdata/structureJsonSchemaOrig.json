@@ -1,6 +1,6 @@
 {
   "kind": "qri:ds:0",
-  "DataPath": "abc",
+  "BodyPath": "abc",
   "path": "123",
     "format": "csv",
   "formatConfig": {

@@ -1,7 +1,8 @@
 {
   "kind": "qri:ds:0",
-  "DataPath": "abc",
+  "BodyPath": "abc",
   "path": "123",
+
   "structure": {
     "checksum": "QmRSLr53cRGhkwx1L3uGNCY7QGvup3XGy9Jcud9",
     "entries": 33,
@@ -11,6 +12,10 @@
     },
     "length": 1582,
     "qri": "st:0",
+    "Commit": {
+      "title": "abc"
+    },
+    "PreviousPath": "",
     "schema": {
       "items": {
         "items": [
@@ -40,8 +45,14 @@
     "title": "abc",
     "description": "I am a new description"
   },
-  "visConfig": {
+  "transform": {
+    "syntax": "python",
+    "data": "abc",
+    "config": {
+      "option": "value"
+    }
+  },
+  "viz": {
     "format": "abc"
   }
 }
-

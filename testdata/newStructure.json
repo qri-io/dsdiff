@@ -1,6 +1,6 @@
 {
   "kind": "qri:ds:0",
-  "DataPath": "abc",
+  "BodyPath": "abc",
   "path": "123",
   "structure": {
     "checksum": "QmRSLr53cRGhkwx1L3uGNCY7QGvup3XGy9Jcaaa",

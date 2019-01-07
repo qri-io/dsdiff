@@ -1,15 +1,8 @@
 {
   "kind": "qri:ds:0",
-  "DataPath": "abc",
+  "BodyPath": "abc",
   "path": "123",
-  "transform": {
-    "appVersion": "0.1.0",
-    "syntax": "sql",
-    "data": "xyz",
-    "config": {
-      "option": "new_value"
-    }
-  },
+
   "structure": {
     "checksum": "QmRSLr53cRGhkwx1L3uGNCY7QGvup3XGy9Jcud9",
     "entries": 33,
@@ -52,7 +45,15 @@
     "title": "abc",
     "description": "I am a dataset"
   },
-  "visConfig": {
+  "transform": {
+    "appVersion": "0.1.0",
+    "syntax": "sql",
+    "data": "xyz",
+    "config": {
+      "option": "new_value"
+    }
+  },
+  "viz": {
     "format": "abc"
   }
 }
