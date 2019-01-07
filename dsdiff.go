@@ -179,7 +179,7 @@ func DiffMeta(a, b *dataset.Meta) (*SubDiff, error) {
 
 // DiffViz diffs the dataset.Viz structs of two datasets
 func DiffViz(a, b *dataset.Viz) (*SubDiff, error) {
-	var emptyDiff = &SubDiff{kind: "visConfig"}
+	var emptyDiff = &SubDiff{kind: "viz"}
 
 	if a == nil {
 		a = &dataset.Viz{}
@@ -195,11 +195,11 @@ func DiffViz(a, b *dataset.Viz) (*SubDiff, error) {
 	}
 	aBytes, err := a.MarshalJSONObject()
 	if err != nil {
-		return nil, fmt.Errorf("error marshalling visConfig a: %s", err.Error())
+		return nil, fmt.Errorf("error marshalling viz a: %s", err.Error())
 	}
 	bBytes, err := b.MarshalJSONObject()
 	if err != nil {
-		return nil, fmt.Errorf("error marshalling visConfig b: %s", err.Error())
+		return nil, fmt.Errorf("error marshalling viz b: %s", err.Error())
 	}
 	return DiffJSON(aBytes, bBytes, emptyDiff.kind)
 }
@@ -228,8 +228,10 @@ type StructuredDataTuple struct {
 // of a dataset.  It calls each of the Diff{Component} functions and
 // adds the option for including de-referenced dataset.Data via
 // the StructuredDataTuple
+// TODO (kasey): This function only diffs: Structure, Meta, Transform, Viz, and Data (in JSON or as a Dataset)
 func DiffDatasets(a, b *dataset.Dataset, deRefData *StructuredDataTuple) (map[string]*SubDiff, error) {
 	result := make(map[string]*SubDiff)
+
 	//diff structure
 	if a.Structure != nil || b.Structure != nil {
 		structureDiffs, err := DiffStructure(a.Structure, b.Structure)
@@ -267,7 +269,7 @@ func DiffDatasets(a, b *dataset.Dataset, deRefData *StructuredDataTuple) (map[st
 		}
 	}
 	// diff transform
-	if a.Transform != nil && b.Transform != nil {
+	if a.Transform != nil || b.Transform != nil {
 		transformDiffs, err := DiffTransform(a.Transform, b.Transform)
 		if err != nil {
 			return nil, err
@@ -276,14 +278,14 @@ func DiffDatasets(a, b *dataset.Dataset, deRefData *StructuredDataTuple) (map[st
 			result[transformDiffs.kind] = transformDiffs
 		}
 	}
-	// diff visConfig
-	if a.Viz != nil && b.Viz != nil {
-		visConfigDiffs, err := DiffViz(a.Viz, b.Viz)
+	// diff viz
+	if a.Viz != nil || b.Viz != nil {
+		vizDiffs, err := DiffViz(a.Viz, b.Viz)
 		if err != nil {
 			return nil, err
 		}
-		if visConfigDiffs.Diff != nil {
-			result[visConfigDiffs.kind] = visConfigDiffs
+		if vizDiffs.Diff != nil {
+			result[vizDiffs.kind] = vizDiffs
 		}
 	}
 	return result, nil
@@ -303,7 +305,7 @@ func MapDiffsToString(m map[string]*SubDiff, how string) (string, error) {
 		"data",
 		"transform",
 		"meta",
-		"visConfig",
+		"viz",
 	}
 	// for _, key := range keys {
 	// 	val, ok := m[key]

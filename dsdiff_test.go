@@ -62,7 +62,7 @@ func TestDiffDataset(t *testing.T) {
   }
 }
 `, ""},
-		{"testdata/orig.json", "testdata/newTitle.json", "listKeys", "Meta: 1 change\n\t- modified title", ""},
+		{"testdata/orig.json", "testdata/newTitle.json", "listKeys", "Transform: 2 changes\n\t- modified config\n\t- modified syntax", ""},
 		{"testdata/orig.json", "testdata/newDescription.json", "plusMinusColor", ` {
 [30;41m-  "description": "I am a dataset",[0m
 [30;42m+  "description": "I am a new description",[0m
