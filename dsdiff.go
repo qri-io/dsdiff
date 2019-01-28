@@ -132,7 +132,7 @@ func DiffTransform(a, b *dataset.Transform) (*SubDiff, error) {
 		b = &dataset.Transform{}
 	}
 
-	if len(a.Path().String()) > 1 && len(b.Path().String()) > 1 {
+	if len(a.Path()) > 1 && len(b.Path()) > 1 {
 		if a.Path() == b.Path() {
 			return emptyDiff, nil
 		}
@@ -159,7 +159,7 @@ func DiffMeta(a, b *dataset.Meta) (*SubDiff, error) {
 		b = &dataset.Meta{}
 	}
 
-	if len(a.Path().String()) > 1 && len(b.Path().String()) > 1 {
+	if len(a.Path()) > 1 && len(b.Path()) > 1 {
 		if a.Path() == b.Path() {
 			return emptyDiff, nil
 		}
@@ -188,7 +188,7 @@ func DiffViz(a, b *dataset.Viz) (*SubDiff, error) {
 		b = &dataset.Viz{}
 	}
 
-	if len(a.Path().String()) > 1 && len(b.Path().String()) > 1 {
+	if len(a.Path()) > 1 && len(b.Path()) > 1 {
 		if a.Path() == b.Path() {
 			return emptyDiff, nil
 		}
