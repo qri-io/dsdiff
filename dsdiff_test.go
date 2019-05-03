@@ -173,3 +173,80 @@ func TestDiffJSON(t *testing.T) {
 		}
 	}
 }
+
+func TestDiffTransform(t *testing.T) {
+	// Same structs
+	diff, err := DiffTransform(&dataset.Transform{
+		ScriptBytes: []byte("return [1,2]"),
+		ScriptPath: "path/to/script.star",
+	}, &dataset.Transform{
+		ScriptBytes: []byte("return [1,2]"),
+		ScriptPath: "path/to/script.star",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if diff.Diff.Modified() {
+		t.Errorf("error: expected not to have been modified")
+	}
+
+	// Different bytes
+	diff, err = DiffTransform(&dataset.Transform{
+		ScriptBytes: []byte("return [1,2]"),
+		ScriptPath: "path/to/script.star",
+	}, &dataset.Transform{
+		ScriptBytes: []byte("return [1,2,3]"),
+		ScriptPath: "path/to/script.star",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !diff.Diff.Modified() {
+		t.Errorf("error: expected modification")
+	}
+
+	// A blank path, so different
+	diff, err = DiffTransform(&dataset.Transform{
+		ScriptBytes: []byte("return [1,2]"),
+		ScriptPath: "",
+	}, &dataset.Transform{
+		ScriptBytes: []byte("return [1,2]"),
+		ScriptPath: "path/to/script.star",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !diff.Diff.Modified() {
+		t.Errorf("error: expected modification")
+	}
+
+	// A blank path, on the other one, so different
+	diff, err = DiffTransform(&dataset.Transform{
+		ScriptBytes: []byte("return [1,2]"),
+		ScriptPath: "path/to/script.star",
+	}, &dataset.Transform{
+		ScriptBytes: []byte("return [1,2]"),
+		ScriptPath: "",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !diff.Diff.Modified() {
+		t.Errorf("error: expected modification")
+	}
+
+	// Paths are different, but both non-blank, so considered the same
+	diff, err = DiffTransform(&dataset.Transform{
+		ScriptBytes: []byte("return [1,2]"),
+		ScriptPath: "path/to/script.star",
+	}, &dataset.Transform{
+		ScriptBytes: []byte("return [1,2]"),
+		ScriptPath: "path/to/renamed-file.star",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if diff.Diff.Modified() {
+		t.Errorf("error: expected not to have been modified")
+	}
+}
