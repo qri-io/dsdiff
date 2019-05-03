@@ -125,27 +125,34 @@ func DiffData(a, b *dataset.Dataset) (*SubDiff, error) {
 func DiffTransform(a, b *dataset.Transform) (*SubDiff, error) {
 	var emptyDiff = &SubDiff{kind: "transform"}
 
-	if a == nil {
-		a = &dataset.Transform{}
+	// Make copies of the input structs, since we might modify them.
+	var left, right dataset.Transform
+	if a != nil {
+		left = *a
 	}
-	if b == nil {
-		b = &dataset.Transform{}
+	if b != nil {
+		right = *b
+	}
+	// The scriptPath is "incidental", and should not contribute to "signficant" differences.
+	// As long as it is non-empty, copy it from one struct to the other.
+	if left.ScriptPath != "" && right.ScriptPath != "" {
+		right.ScriptPath = left.ScriptPath
 	}
 
-	if len(a.Path) > 1 && len(b.Path) > 1 {
-		if a.Path == b.Path {
+	if len(left.Path) > 1 && len(right.Path) > 1 {
+		if left.Path == right.Path {
 			return emptyDiff, nil
 		}
 	}
-	aBytes, err := a.MarshalJSONObject()
+	leftBytes, err := left.MarshalJSONObject()
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling transform a: %s", err.Error())
 	}
-	bBytes, err := b.MarshalJSONObject()
+	rightBytes, err := right.MarshalJSONObject()
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling transform b: %s", err.Error())
 	}
-	return DiffJSON(aBytes, bBytes, emptyDiff.kind)
+	return DiffJSON(leftBytes, rightBytes, emptyDiff.kind)
 }
 
 // DiffMeta diffs the metadata of two datasets
