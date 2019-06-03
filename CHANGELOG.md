@@ -1,3 +1,9 @@
+<a name="v0.1.1"></a>
+# [v0.1.1](https://github.com/qri-io/dsdiff/compare/v0.1.0...v0.1.1) (2019-06-03)
+
+We had a cross-dependency issue with github.com/qri-io/jsonschema. This release should fix that.
+
+
 # 0.1.0 (2019-05-30)
 
 `dsdiff` is a utility for diffing datasets, currently a basic placeholder
