@@ -411,8 +411,11 @@ github.com/qri-io/dataset v0.0.0-20190516191825-5a7de4a0f2d4 h1:UAGqUgNmOM4z4grI
 github.com/qri-io/dataset v0.0.0-20190516191825-5a7de4a0f2d4/go.mod h1:JF7Gsqd+3LU7lmOriBRtNVJ0HkciNX6aVjoMAM3bOdA=
 github.com/qri-io/jsonpointer v0.0.0-20190212172158-7f104febd1fd h1:A/otcrPitGkmouHBoyuvt7xFMVeGbNq2HLQGMgshdJE=
 github.com/qri-io/jsonpointer v0.0.0-20190212172158-7f104febd1fd/go.mod h1:DnJPaYgiKu56EuDp8TU5wFLdZIcAnb/uH9v37ZaMV64=
-github.com/qri-io/jsonschema v0.1.0 h1:ASQbkkRJzJfTo+Lg84jPfFlwYtneNl3ZYx3vikIc8ac=
-github.com/qri-io/jsonschema v0.1.0/go.mod h1:rlnuSZCX0LfkXwEhqARuBp800hH8tKV/EtgeD3yVT8s=
+github.com/qri-io/jsonpointer v0.1.0 h1:OcTtTmorodUCRc2CZhj/ZwOET8zVj6uo0ArEmzoThZI=
+github.com/qri-io/jsonpointer v0.1.0/go.mod h1:DnJPaYgiKu56EuDp8TU5wFLdZIcAnb/uH9v37ZaMV64=
+github.com/qri-io/jsonschema v0.1.0/go.mod h1:QpzJ6gBQ0GYgGmh7mDQ1YsvvhSgE4rYj0k8t5MBOmUY=
+github.com/qri-io/jsonschema v0.1.1 h1:t//Doa/gvMqJ0bDhG7PGIKfaWGGxRVaffp+bcvBGGEk=
+github.com/qri-io/jsonschema v0.1.1/go.mod h1:QpzJ6gBQ0GYgGmh7mDQ1YsvvhSgE4rYj0k8t5MBOmUY=
 github.com/qri-io/qfs v0.1.0 h1:XgDhon13qLlwJHI2m0FAc2EhZEcrqMPwizvgfQXHzB8=
 github.com/qri-io/qfs v0.1.0/go.mod h1:vZ5gVAYKaW8bDLh8U8DEr3s/1JyNzQJg1Rg9HYS+VZo=
 github.com/rogpeppe/go-internal v1.1.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
